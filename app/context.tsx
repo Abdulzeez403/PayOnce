@@ -73,18 +73,11 @@ export const AuthContextProvider: React.FC<IProps> = ({ children }) => {
     const [signinMutation] = useMutation(SIGNIN_MUTATION);
     const [createUserMutation] = useMutation(CREATE_USER_MUTATION);
 
-
-
     const resetError = () => {
         setIsError(false);
         setLoading(false)
         setSuccess(false)
     };
-
-
-
-
-
 
     const signIn = async (email: string, password: string) => {
         setLoading(true)

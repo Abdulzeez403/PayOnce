@@ -2,16 +2,16 @@ import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { ApIcon } from '@/components/icon'
 import ApSafeAreaView from '@/components/safeAreaView'
-import Clipboard from '@react-native-clipboard/clipboard';
+// import Clipboard from '@react-native-clipboard/clipboard';
 
 type Props = {}
 
 const account = (props: Props) => {
 
-    const copyToClipboard = (text: string) => {
-        Clipboard.setString(text);
-        console.log('Copied to clipboard!', text);
-    };
+    // const copyToClipboard = (text: string) => {
+    //     Clipboard.setString(text);
+    //     console.log('Copied to clipboard!', text);
+    // };
 
     return (
         <ApSafeAreaView>
@@ -39,7 +39,7 @@ const account = (props: Props) => {
                             name="copy"
                             type="Feather"
                             color="white"
-                            onPress={() => copyToClipboard}
+
                         />
 
                     </View>

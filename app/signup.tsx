@@ -32,20 +32,21 @@ const SignupScreen = () => {
     const { createWallet, } = useWalletContext()
 
 
-    const handleSubmit = async (value: CreateUserInput & IWallet) => {
+    const handleSubmit = async (value: IWallet) => {
         try {
 
             const payload: IWallet = {
-                walletName: value.firstName,
-                customerName: value.firstName + value.lastName,
-                customerEmail: value.email,
-                bvn: value.bvn,
-                bvnDateOfBirth: "1995-05-13",
+                firstName: value.firstName,
+                lastName: value.lastName,
+                email: value.email,
+                phone: value.phone
+                // preferred_bank: value.preferred_bank
+
             }
             console.log("thevale", value)
 
             await createWallet(payload)
-            await signUp(value).then(() => {
+            await signUp(value as any).then(() => {
                 router.navigate("signin")
 
             })
@@ -65,9 +66,8 @@ const SignupScreen = () => {
                     firstName: "",
                     lastName: "",
                     email: "",
-                    bvn: "",
                     phone: "",
-                    password: ""
+
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}

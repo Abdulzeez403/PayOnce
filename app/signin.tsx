@@ -51,21 +51,16 @@ const SignInScreen = () => {
     }
 
     )
-
-
     const { signIn, loading } = useAuthContext();
 
     const handleSubmit = async (value: any) => {
         const { email, password } = value;
         try {
             await signIn(email, password);
-
             router.navigate("home")
-
-
         } catch (error) {
             console.log(error)
-            Alert.alert("Invalid  email or password!")
+        
 
         }
 
