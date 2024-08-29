@@ -13,38 +13,6 @@ import * as Yup from 'yup';
 
 
 const SignInScreen = () => {
-    // useEffect(() => {
-    //     const checkAuthenticate = async () => {
-    //         try {
-    //             const result = await ServiceStorage.getData("login");
-    //             if (await client.isAuthenticated && result !== "true" as any) {
-    //                 router.navigate("/home");
-    //                 console.log("authenticated!!");
-    //             } else {
-    //                 router.navigate("/signin");
-    //                 console.log("unauthenticated!!");
-    //             }
-    //         } catch (error) {
-    //             console.error("Error:", error);
-    //             router.navigate("/signin");
-    //         }
-    //     };
-
-    //     checkAuthenticate();
-    // }, []);
-
-
-
-
-    // const handleSignIn = async () => {
-    //     const token = await client.login();
-    //     if (token) {
-    //         await ServiceStorage.storeData("login", "true")
-    //         router.replace("/passcodesetup");
-    //         console.log("success login...")
-    //     }
-    // };
-
     const validationSchema = Yup.object().shape({
         email: Yup.string().required("email is required"),
         password: Yup.string().required("password is required"),
@@ -60,10 +28,8 @@ const SignInScreen = () => {
             router.navigate("home")
         } catch (error) {
             console.log(error)
-        
 
         }
-
     }
 
 
@@ -72,7 +38,6 @@ const SignInScreen = () => {
             <ApHeader title='Sign In' leftIcon={<ApBackButton />} />
 
             <ApSpinner loading={loading} />
-
             <View>
                 <Formik
                     initialValues={{ email: "", password: "" }}
@@ -90,7 +55,6 @@ const SignInScreen = () => {
                                 name="email"
                                 label="Email"
                                 placeholder="example@gmail.com"
-                            // keyboardType="numeric"
                             />
 
                             <Field
@@ -100,7 +64,7 @@ const SignInScreen = () => {
                                 placeholder="*******"
                                 keyboardType="numeric"
                             />
-
+ 
                             <View>
                                 <ApButton label="Sign In" onPress={handleSubmit} />
 

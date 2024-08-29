@@ -108,7 +108,7 @@ export const NetworkProviders = [
     img: require("../assets/images/mtn.png"),
   },
   {
-    value: "9mobile",
+    value: "etisalat",
     img: require("../assets/images/9mobile.jpeg"),
   },
 ];

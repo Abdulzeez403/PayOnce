@@ -4,9 +4,20 @@ import { ApIcon } from '@/components/icon'
 import RoundedImage from '@/components/image'
 import { ApButton } from '@/components/button'
 import { router } from 'expo-router'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 
 const index = () => {
+
+    const SignOut = async () => {
+        try {
+            await AsyncStorage.removeItem('token');
+            console.log('Sign out successful, token removed');
+            router.push("/signin")
+        } catch (error) {
+            console.error('Error removing token:', error);
+        }
+    };
 
 
     return (
@@ -31,7 +42,7 @@ const index = () => {
                 <LinkComponent />
             </View>
 
-            <ApButton label="LogOut" onPress={() => router.navigate("signin")} />
+            <ApButton label="LogOut" onPress={SignOut} />
         </SafeAreaView>
     )
 }

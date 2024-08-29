@@ -1,81 +1,92 @@
-import ApBottomSheet from "@/components/bottomSheet";
 import { ApButton } from "@/components/button";
 import ApHeader from "@/components/header";
 import { ApIcon } from "@/components/icon";
 import ApBackButton from "@/components/icon/back";
-import ApPicker from "@/components/input/picker";
 import ApTextInput from "@/components/input/textInput";
 import ApSafeAreaView from "@/components/safeAreaView";
 import { Formik, Field } from "formik";
 import { useRef, useState } from "react";
-import { View, TouchableOpacity, Image, Text, Button } from "react-native";
+import { View, TouchableOpacity, Image, Text, Button, ActivityIndicator } from "react-native";
 import { BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet";
 import CustomBottomSheetModal from "@/components/bottomSheet";
 import { IBuyData } from "@/service/types";
 import { generateRequestID } from "@/service/apis";
-import { useBuyDataBundleContext } from "./context";
 import { NetworkProviders } from "@/constants/data";
 import { useVtpassContext } from "../context";
+import { useBuyDataBundleContext } from "./context";
+import ApModal from "@/components/modal";
+import { router } from "expo-router";
 
 const DataForm = () => {
 
 
     const [selectedDataPlan, setSelectedDataPlan] = useState('')
-    const { dataServices, getDataPlan } = useVtpassContext()
-    const [inputValue, setInputValue] = useState<{ variation_code: string, amount: number }>({
+    const { dataServices, getDataPlan } = useVtpassContext();
+    const {buyDatabundle,getDataPlans, success, resetError, loading, isError} = useBuyDataBundleContext()
+    const [inputValue, setInputValue] = useState<{ variation_code: string}>({
         variation_code: "mtn-10mb-100",
-        amount: 50
     });
-
+    const [modalVisible, setModalVisible] = useState(false);
+    const [formValues, setFormValues] = useState<{  billersCode: string } | null>(null);
 
     const bottomSheetRef = useRef<BottomSheetModal>(null);
     const { dismiss } = useBottomSheetModal();
-
     const handlePresentModalPress = () => bottomSheetRef.current?.present();
 
     const handleDataPlan = async (value: any) => {
-        await setSelectedDataPlan(value)
-        handlePresentModalPress()
-        getDataPlan(value)
-
+        const payload = `${value}-data`
+        setSelectedDataPlan(payload);
+        handlePresentModalPress();
+        await getDataPlan(payload);
     }
 
-    console.log(dataServices)
 
     const handleFormSubmit = async (values: IBuyData) => {
         const id = generateRequestID();
-
         const payload = {
-            amount: Number(values.amount),
-            billersCode: "08011111111",
-            phone: Number(values.phone),
+            billersCode:values.billersCode,
+            phone:"08011111111" ,
             serviceID: selectedDataPlan,
             variation_code: inputValue?.variation_code,
             request_id: id
         }
-        // getDataPlans(payload)
+        buyDatabundle(payload)
+        console.log(payload, 'payload...')
 
     };
 
+    const handleOpenModal = (values: any) => {
+        setFormValues(values);
+        setModalVisible(true);
+    };
 
+    const handleCloseModal = () => {
+        setModalVisible(false);
+        resetError();
+    };
+
+    const resetFormValues = (formikProps: any) => {
+        formikProps.resetForm();
+        setModalVisible(false);
+    };
 
 
     return (
         <ApSafeAreaView>
             <ApHeader title='Buy Data Bundles' leftIcon={<ApBackButton />} />
             <Formik
-                initialValues={{ amount: 100, phone: '' }}
+                initialValues={{  billersCode: '' }}
                 onSubmit={handleFormSubmit}
             >
-                {({ handleSubmit }) => (
+                {({ handleSubmit, values }) => (
                     <View>
                         <View>
                             <Text style={{ marginVertical: 10 }}>Service Provider: {selectedDataPlan}</Text>
                             <View style={{ flexDirection: "row", gap: 10 }}>
                                 {NetworkProviders.map((p, index) => (
-                                    <TouchableOpacity key={index} onPress={() => handleDataPlan(p.value)}>
-
-
+                                    <TouchableOpacity key={index} onPress={() => {
+                                        handleDataPlan(p.value)
+                                }}>
                                         <View style={selectedDataPlan === p.value ? { position: "relative", borderWidth: 2, borderColor: "red", borderRadius: 4, padding: 4 } : {}}>
                                             <Image
                                                 source={p.img}
@@ -93,20 +104,18 @@ const DataForm = () => {
                             </View>
                         </View>
 
-
-
-                        <Field
+                        {/* <Field
                             component={ApTextInput}
                             name="amount"
                             label="Enter Amount"
                             placeholder="Enter amount..."
                             keyboardType="numeric"
-                        />
+                        /> */}
 
 
                         <Field
                             component={ApTextInput}
-                            name="phone"
+                            name="billersCode"
                             label="Reciept Number"
                             placeholder="Enter phone number..."
                             keyboardType="phone-pad"
@@ -121,10 +130,7 @@ const DataForm = () => {
 
                         />
 
-                        <ApButton label="Continue" onPress={handleSubmit} />
-                        <Text>{inputValue.amount}....</Text>
-
-
+                        <ApButton label="Continue..." onPress={()=>handleOpenModal(values)} />
                     </View>
                 )}
             </Formik>
@@ -138,7 +144,6 @@ const DataForm = () => {
                                 <TouchableOpacity key={i} onPress={() => {
                                     setInputValue({
                                         variation_code: s.variation_code,
-                                        amount: s.variation_amount
                                     }),
                                         dismiss()
                                 }}>
@@ -157,6 +162,51 @@ const DataForm = () => {
                 </CustomBottomSheetModal>
 
             </View>
+
+            <ApModal visible={modalVisible} onClose={handleCloseModal}>
+                {formValues && !isError && !success && (
+                    <View>
+                        <Text style={{ textAlign: "center", paddingVertical: 4 }}>
+                            Confirm the following information:
+                        </Text>
+                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                            <Text>Service</Text>
+                            <Text>{selectedDataPlan}</Text>
+                        </View>
+                      
+                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                            <Text>Phone Number</Text>
+                            <Text>{formValues.billersCode}</Text>
+                        </View>
+                        <ApButton
+                            label={loading ? (<ActivityIndicator />) : "Continue/pay"}
+                            onPress={() => handleFormSubmit(formValues)}
+                        />
+                    </View>
+                )}
+
+                {success && (
+                    <View>
+                        <Text>Congratulations!</Text>
+                        <Text>Your transaction was successful.</Text>
+                        <View>
+                            <ApButton label="Place Another Transaction" onPress={() => resetFormValues} />
+                            <ApButton label="Close" onPress={() => { router.navigate("/home") }} />
+                        </View>
+                    </View>
+                )}
+
+                {isError && (
+                    <View>
+                        <View>
+                            <Text style={{ textAlign: "center", color: "red" }}>Oppor!:</Text>
+                            <Text>Are you sure the receipt number is correct?</Text>
+                        </View>
+                        <ApButton label="Try Again" onPress={handleCloseModal} />
+                    </View>
+                )}
+
+            </ApModal>
 
         </ApSafeAreaView>
     )

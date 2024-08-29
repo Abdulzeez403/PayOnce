@@ -63,11 +63,6 @@ export const VtpassProvider: React.FC<IProps> = ({ children }) => {
     const [success, setSuccess] = useState<boolean>(false);
     const [electricityProvider, setElectricityProvder] = useState([])
     const [tvSubPlan, setTvSubPlan] = useState([])
-
-
-
-
-
     const resetError = () => {
         setIsError(false);
         setLoading(false)
@@ -185,7 +180,7 @@ export const VtpassProvider: React.FC<IProps> = ({ children }) => {
         }
     };
 
-    const vpassBuyData = async ({ amount, billersCode, phone, variation_code, serviceID, request_id }: IBuyData) => {
+    const vpassBuyData = async ({  billersCode, phone, variation_code, serviceID, request_id }: IBuyData) => {
 
         setLoading(true)
         try {
@@ -193,7 +188,6 @@ export const VtpassProvider: React.FC<IProps> = ({ children }) => {
             const s_secret = "SK_108b772e5caa5f683e02eafc2c7ab94d3ba69abab7f"; // Replace with your actual secret key
 
             const requestBody = {
-                amount: amount,
                 phone: phone,
                 serviceID: serviceID,
                 billersCode: billersCode,

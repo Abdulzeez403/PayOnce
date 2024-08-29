@@ -9,23 +9,26 @@ import ApHeader from '@/components/header'
 import ApBackButton from '@/components/icon/back'
 import { router } from 'expo-router'
 import ApModal from '@/components/modal'
-import { useGraphqlApiContext } from '../graphql/content'
 import { useBuyAirtimeContext } from './context'
 import { NetworkProviders } from '@/constants/data'
+import * as yup from 'yup';
 
 
 
-
+const validationSchema = yup.object().shape({
+    amount: yup
+    .number()
+    .required('Amount is required'),
+    phone:yup.string().required("Amount is Required"),
+    // serviceID:yup.string().required("serviceID is Required")
+})
 
 const AirtimeForm = () => {
-
-
     const [selectedAirtime, setSelectedAirtime] = useState("");
-    const { loading, isError, buyAirtime, getAirtimeQuery, success, resetError } = useBuyAirtimeContext();
-    const { getAirtmeInfo, airtime } = useGraphqlApiContext()
-
+    const { loading, isError, buyAirtime, success, resetError } = useBuyAirtimeContext();
     const [modalVisible, setModalVisible] = useState(false);
-    const [formValues, setFormValues] = useState<{ amount: string; phoneNumber: string } | null>(null);
+    const [formValues, setFormValues] = useState<{ amount: string; phone: string } | null>(null);
+
 
     const handleOpenModal = (values: any) => {
         setFormValues(values);
@@ -38,30 +41,30 @@ const AirtimeForm = () => {
     };
 
     const handleFormSubmit = async (values: any) => {
-        const { phoneNumber, amount } = values;
-        const payload = { phoneNumber, amount, serviceID: selectedAirtime };
+        const { phone, amount } = values;
+        const payload = { phoneNumber:phone, amount, serviceID: selectedAirtime };
         console.log(payload, "...");
         await buyAirtime(payload);
     };
 
 
-    const initialValues = { amount: '', phone: '', serviceID: '' };
+    const initialValues = { amount: '', phone: '', serviceID:''};
     const resetFormValues = (formikProps: any) => {
         formikProps.resetForm();
         setModalVisible(false);
-
-
     };
+
+
     return (
         <ApSafeAreaView>
             <ApHeader title='Buy Airtime' leftIcon={<ApBackButton />} />
 
             <Formik
                 initialValues={initialValues}
-                // validationSchema={validationSchema}
+                validationSchema={validationSchema}
                 onSubmit={handleFormSubmit}
             >
-                {({ handleSubmit, values, resetForm }) => (
+                {({ handleSubmit, values, resetForm, isValid, dirty  }) => (
                     <View>
                         <View>
                             <Text style={{ marginVertical: 10 }}>Service Provider: {selectedAirtime}</Text>
@@ -95,13 +98,14 @@ const AirtimeForm = () => {
                         />
                         <Field
                             component={ApTextInput}
-                            name="phoneNumber"
+                            name="phone"
                             label="Phone Number"
                             placeholder="Enter phone number..."
                             keyboardType="phone-pad"
                         />
                         <ApButton label="Continue"
-                            onPress={() => handleOpenModal(values)} />
+                            onPress={() => handleOpenModal(values)}
+                            disabled={!(isValid && dirty)} />
                     </View>
 
 
@@ -114,12 +118,20 @@ const AirtimeForm = () => {
             <ApModal visible={modalVisible} onClose={handleCloseModal}>
                 {formValues && !isError && !success && (
                     <View>
-                        <Text style={{ textAlign: "center", paddingVertical: 4 }}>
+                                        <View style={{ justifyContent: "center", alignItems: "center" }}>
+        <ApIcon
+            size={50}
+            name="verified"
+            type="MaterialIcons"
+            color='green'
+        />
+    </View>
+                        <Text style={{ textAlign: "center", fontWeight:"800" }}>
                             Confirm the following information:
                         </Text>
-                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                        <View style={{ flexDirection: "row", justifyContent: "space-between" , marginTop:10 }}>
                             <Text>Service</Text>
-                            <Text>{selectedAirtime}</Text>
+                            <Text>{selectedAirtime.toUpperCase()}</Text>
                         </View>
                         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                             <Text>Amount</Text>
@@ -127,7 +139,7 @@ const AirtimeForm = () => {
                         </View>
                         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                             <Text>Phone Number</Text>
-                            <Text>{formValues.phoneNumber}</Text>
+                            <Text style={{fontWeight:"bold"}}>{formValues.phone}</Text>
                         </View>
                         <ApButton
                             label={loading ? (<ActivityIndicator />) : "Continue/pay"}
@@ -138,12 +150,21 @@ const AirtimeForm = () => {
 
                 {success && (
                     <View>
-                        <Text>Congratulations!</Text>
-                        <Text>Your transaction was successful.</Text>
-                        <View>
-                            <ApButton label="Place Another Transaction" onPress={() => resetFormValues} />
-                            <ApButton label="Close" onPress={() => { router.navigate("/home") }} />
-                        </View>
+                        <Text style={{textAlign:"center", fontWeight:"800"}}>Congratulations!</Text>
+                        <Text style={{textAlign:"center"}}>Your transaction was successful.</Text>
+
+                        <View style={{ justifyContent: "center", alignItems: "center" }}>
+        <ApIcon
+            size={45}
+            name="check"
+            type="FontAwesome"
+            color='green'
+        />
+    </View>
+                            <ApButton label="Close" onPress={() => { 
+                                router.navigate("/home");
+                                resetError()
+                                 }} />
                     </View>
                 )}
 
@@ -153,7 +174,7 @@ const AirtimeForm = () => {
                             <Text style={{ textAlign: "center", color: "red" }}>Oppor!:</Text>
                             <Text>Are you sure the receipt number is correct?</Text>
                         </View>
-                        <ApButton label="Try Again" onPress={handleCloseModal} />
+                        <ApButton label="Try Again" onPress={handleCloseModal}  />
                     </View>
                 )}
 
@@ -167,5 +188,4 @@ const AirtimeForm = () => {
 
 export default AirtimeForm
 
-const styles = StyleSheet.create({})
 

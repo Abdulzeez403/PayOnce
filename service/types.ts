@@ -9,7 +9,6 @@ export interface IBuyData {
   request_id?: string;
   billersCode?: string;
   variation_code?: string;
-  amount?: number;
   phone?: number | any;
 }
 
@@ -23,20 +22,15 @@ export interface IVerifyMeterNumber {
   request_id?: string;
 }
 
-export interface IWallet {
-  walletReference?: string;
-  walletName?: string;
-  customerName?: string;
-  customerEmail?: string;
-  bvn: string;
-  bvnDateOfBirth: any;
-}
+
 
 export interface CreateUserInput {
-  bvn: string;
   email: string;
   firstName: string;
   lastName: string;
-  password: string;
   phone: string;
+  balance?: string;
+  verificationCode?:string;
+  verificationCodeExpiry?:any;
+  isVerified?: boolean;
 }

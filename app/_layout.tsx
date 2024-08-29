@@ -1,23 +1,23 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect } from 'react';
 import { useColorScheme } from '@/components/useColorScheme';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ApolloProvider } from '@apollo/client';
-import client from '@/apolloclient';
-import { GraphqlApiProvider } from './form/graphql/content';
 import { BuyAirtimeProvider } from './form/airtime/context';
 import { BuyTvScriptionProvider } from './form/tvsubscription/context';
 import { BuyDataBundleProvider } from './form/databundle/context';
 import { BuyElectricityProvider } from './form/electricity/context';
 import { VtpassProvider } from './form/context';
-import { WalletProvider } from './form/wallet/context';
 import { AuthContextProvider } from './context';
+import Toast from 'react-native-toast-message';
+import toastConfig from '@/service/toast';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { PaymentProvider } from './payment/context';
 
 
 export {
@@ -42,16 +42,25 @@ export default function RootLayout() {
         ...FontAwesome.font,
     });
 
-    // Expo Router uses Error Boundaries to catch errors in the navigation tree.
     useEffect(() => {
-        if (error) throw error;
-    }, [error]);
+        const checkTokenAndNavigate = async () => {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                router.replace('/signin');
+            } else {
+                router.replace('/passcode');
+            }
+        };
 
-    useEffect(() => {
+        checkTokenAndNavigate(); // Execute the async function
+
+        // Handle splash screen
         if (loaded) {
             SplashScreen.hideAsync();
         }
-    }, [loaded]);
+
+        if (error) throw error;
+    }, [loaded, error]);
 
     if (!loaded) {
         return null;
@@ -60,25 +69,21 @@ export default function RootLayout() {
     return <RootLayoutNav />;
 }
 
+
+
 function RootLayoutNav() {
     const colorScheme = useColorScheme();
 
     return (
 
-
-        <ApolloProvider client={client}>
-            {/* <Provider store={store}> */}
             <AuthContextProvider>
-
+                <PaymentProvider>
                 <VtpassProvider>
-
                     <BuyAirtimeProvider>
                         <BuyTvScriptionProvider>
                             <BuyDataBundleProvider>
                                 <BuyElectricityProvider>
-                                    <WalletProvider>
 
-                                        <GraphqlApiProvider>
                                             <GestureHandlerRootView style={{ flex: 1 }}>
                                                 <BottomSheetModalProvider>
                                                     <SafeAreaProvider>
@@ -87,20 +92,22 @@ function RootLayoutNav() {
                                         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                                          <Stack.Screen name="index" options={{ headerShown: false }} />
                                                                 <Stack.Screen name="signin" options={{ headerShown: false }} />
-
                                                                 <Stack.Screen name="signup" options={{ headerShown: false }} />
                                                                 <Stack.Screen name="form" options={{ headerShown: false }} />
-                                                                <Stack.Screen name="passcode" options={{ headerShown: false }} />  <Stack.Screen name="passcodesetup" options={{ headerShown: false }} />
+                                                                <Stack.Screen name="passcode" options={{ headerShown: false }} /> 
+                                                                 <Stack.Screen name="passcodesetup" options={{ headerShown: false }} />
+                                                                 <Stack.Screen name="verification" options={{ headerShown: false }} />
 
 
 
                                                             </Stack>
+
+                                                            <Toast config={toastConfig} />
+                                                            <Toast />
                                                         </ThemeProvider>
                                                     </SafeAreaProvider>
                                                 </BottomSheetModalProvider>
                                             </GestureHandlerRootView>
-                                        </GraphqlApiProvider>
-                                    </WalletProvider>
 
                                 </BuyElectricityProvider>
 
@@ -109,13 +116,7 @@ function RootLayoutNav() {
                         </BuyTvScriptionProvider>
                     </BuyAirtimeProvider>
                 </VtpassProvider>
-
+                </PaymentProvider>
             </AuthContextProvider>
-
-
-            {/* </Provider> */}
-        </ApolloProvider>
-
-
     );
 }

@@ -3,11 +3,7 @@ import React, { useEffect } from 'react';
 import { ApButton } from '@/components/button';
 import { router } from 'expo-router';
 
-const Simple = () => {
-
-
-
-
+const HomePage = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View>
@@ -24,7 +20,7 @@ const Simple = () => {
     );
 };
 
-export default Simple;
+export default HomePage;
 
 const styles = StyleSheet.create({
     container: {

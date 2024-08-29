@@ -4,7 +4,6 @@ import RoundedImage from '@/components/image';
 import { ApIcon } from '@/components/icon';
 import { ApButton } from '@/components/button';
 import { Link, router } from 'expo-router';
-import { useWalletContext } from '@/app/form/wallet/context';
 
 interface IUser {
     family_name: string,
@@ -17,14 +16,8 @@ interface IUser {
 const index = () => {
 
     const [currentUser, setCurrentUser] = useState<IUser>()
-    const { balance, getWalletBalance } = useWalletContext()
 
 
-
-    useEffect(() => {
-        getWalletBalance("7778798996")
-
-    }, [])
 
 
     const quickAction = [
@@ -60,7 +53,7 @@ const index = () => {
 
     ]
 
-    const quickActivity = [
+    const quickActivity:any[] = [
         // {
         //     id: 1,
         //     title: "Electricity Token Purchased",
@@ -129,7 +122,7 @@ const index = () => {
                                 type="FontAwesome6"
                                 color="white"
                             />
-                            <Text style={{ color: "white", fontWeight: "bold", fontSize: 38, fontFamily: "Ubuntu_Bold" }}>{balance}</Text>
+                            <Text style={{ color: "white", fontWeight: "bold", fontSize: 38, fontFamily: "Ubuntu_Bold" }}>500</Text>
 
                             <View style={{ paddingHorizontal: 10 }}>
                                 <ApIcon

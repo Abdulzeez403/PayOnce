@@ -14,11 +14,6 @@ export default function PasscodeScreen() {
     const [pinCode, setPinCode] = useState<number[]>([]);
 
 
-
-
-
-
-
     const DialPad = ({ onPress }: { onPress: (item: number | string) => void }) => {
         return (
             <View style={{ height: 420 }}>

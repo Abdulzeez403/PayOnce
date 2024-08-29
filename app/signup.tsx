@@ -12,16 +12,14 @@ import ApHeader from '@/components/header'
 import ApBackButton from '@/components/icon/back'
 import ApSpinner from '@/components/loader/spinner'
 import { useAuthContext } from './context'
-import { CreateUserInput, IWallet } from '@/service/types'
 import * as Yup from 'yup';
-import { useWalletContext } from './form/wallet/context'
+import { CreateUserInput } from '@/service/types'
 
 
 const validationSchema = Yup.object().shape({
     firstName: Yup.string().required("firstName is required"),
-    lastName: Yup.string().required(),
+    lastName: Yup.string().required("lastName is required"),
     email: Yup.string().email("Invalid email").required("Email is required"),
-    bvn: Yup.number().required(),
     phone: Yup.string().required(),
     password: Yup.number().required(),
 })
@@ -29,26 +27,12 @@ const validationSchema = Yup.object().shape({
 
 const SignupScreen = () => {
     const { signUp, loading } = useAuthContext()
-    const { createWallet, } = useWalletContext()
 
 
-    const handleSubmit = async (value: IWallet) => {
+    const handleSubmit = async (value: CreateUserInput) => {
         try {
-
-            const payload: IWallet = {
-                firstName: value.firstName,
-                lastName: value.lastName,
-                email: value.email,
-                phone: value.phone
-                // preferred_bank: value.preferred_bank
-
-            }
-            console.log("thevale", value)
-
-            await createWallet(payload)
             await signUp(value as any).then(() => {
-                router.navigate("signin")
-
+                router.navigate("verification")
             })
         } catch (error) {
             console.error(error);
@@ -67,6 +51,7 @@ const SignupScreen = () => {
                     lastName: "",
                     email: "",
                     phone: "",
+                    password:""
 
                 }}
                 validationSchema={validationSchema}
@@ -95,17 +80,7 @@ const SignupScreen = () => {
                             name="email"
                             label="Email"
                             placeholder="example@gmail.com"
-                        // keyboardType="numeric"
                         />
-
-                        <Field
-                            component={ApTextInput}
-                            name="bvn"
-                            label="bvn"
-                            placeholder="bvn number"
-                        // keyboardType="numeric"
-                        />
-
 
                         <Field
                             component={ApTextInput}

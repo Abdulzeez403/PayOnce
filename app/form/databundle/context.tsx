@@ -10,6 +10,8 @@ interface IProp {
     resetError: () => void;
     getDataPlans: (serviceID: any) => void
     buyDatabundle: (values: IBuyData) => void
+    getDataQuery: (request_id: any) => void
+
 
 
 
@@ -24,6 +26,11 @@ const BuyDataBundleContext = createContext<IProp>({
         return serviceID
     },
     buyDatabundle: () => { },
+
+    getDataQuery: (request_id: any) => {
+        return request_id
+    },
+
 });
 
 export const useBuyDataBundleContext = () => {
@@ -51,7 +58,9 @@ export const BuyDataBundleProvider: React.FC<IProps> = ({ children }) => {
 
 
     const querydataplansUri = "https://sandbox.vtpass.com/api/service-variations?serviceID="
-    const purchaseDatabundleUri = " https://sandbox.vtpass.com/api/pay"
+    const purchaseDatabundleUri = "https://sandbox.vtpass.com/api/pay"
+    const querySuccessResponseUrl = "https://sandbox.vtpass.com/api/requery"
+
 
 
 
@@ -77,7 +86,6 @@ export const BuyDataBundleProvider: React.FC<IProps> = ({ children }) => {
 
             if (response.ok) {
                 const data = await response.json();
-
                 console.log("API Response:", data);
                 setDataServices(data)
                 return data;
@@ -93,13 +101,11 @@ export const BuyDataBundleProvider: React.FC<IProps> = ({ children }) => {
         }
     };
 
-    const buyDatabundle = async ({ amount, billersCode, phone, variation_code, serviceID, request_id }: IBuyData) => {
-
+    const buyDatabundle = async ({  billersCode, phone, variation_code, serviceID, request_id }: IBuyData) => {
         setLoading(true)
         try {
 
             const requestBody = {
-                amount: amount,
                 phone: phone,
                 serviceID: serviceID,
                 billersCode: billersCode,
@@ -116,20 +122,82 @@ export const BuyDataBundleProvider: React.FC<IProps> = ({ children }) => {
                 },
                 body: JSON.stringify(requestBody),
             });
+           
+            if (!response.ok) {
+                throw new Error("Purchase request failed");
+                
+            } 
 
-            if (response.ok) {
-                const data = await response.json();
-                console.log("API Response:", data);
-            } else {
-                console.error("API Error:", response.statusText);
+            const purchaseData = await response.json();
+
+
+             // Check if purchase was successful
+             if (purchaseData.code === "000") {
+                console.log("Purchase successful");
+
+                const requeryResponse = await fetch(querySuccessResponseUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "api-key": s_api_key,
+                        "secret-key": s_secret,
+                    },
+                    body: JSON.stringify({ request_id: request_id }),
+                });
+
+                if (!requeryResponse.ok) {
+                    throw new Error("Transaction status query failed");
+                }
+
+                const requeryData = await requeryResponse.json();
+                console.log("Transaction Status:", requeryData);
+                setSuccess(true)
                 setLoading(false)
-
+                console.log(success)
+            } else {
+                console.error("Purchase failed:", purchaseData.errors);
+                setIsError(true)
             }
-        } catch (error) {
+        } catch (error:any) {
             console.error("Error:", error);
             setLoading(false)
 
         }
+
+    }
+
+    const getDataQuery = (request_id: any) => {
+        const url = 'https://sandbox.vtpass.com/api/requery'
+        const s_api_key = "82f7a4ee19cbf4a71c267ef390c378ae"; // Replace with your actual API key
+        const s_secret = "SK_108b772e5caa5f683e02eafc2c7ab94d3ba69abab7f"; // Replace with your actual secret key
+
+        const requestData = {
+            request_id: request_id // Replace 'YOUR_REQUEST_ID_HERE' with the actual request ID
+        };
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                "api-key": s_api_key,
+                "secret-key": s_secret,
+            },
+            body: JSON.stringify(requestData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Handle the response data
+                console.log('Response:', data);
+            })
+            .catch(error => {
+                // Handle errors
+                console.error('Error:', error);
+            });
 
     }
 
@@ -142,7 +210,7 @@ export const BuyDataBundleProvider: React.FC<IProps> = ({ children }) => {
         <BuyDataBundleContext.Provider
             value={{
                 loading, success, isError, dataServices,
-                buyDatabundle, getDataPlans, resetError,
+                buyDatabundle, getDataPlans,getDataQuery, resetError,
             }}>
             {children}
 
