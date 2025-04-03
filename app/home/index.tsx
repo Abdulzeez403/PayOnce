@@ -82,11 +82,7 @@ const index = () => {
                 <View style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 40, paddingHorizontal: 10, alignItems: "center" }} >
 
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                        <View>
-                            {/* <RoundedImage source={{ uri: currentUser?.picture }}
-                                width={45} height={45}
-                            /> */}
-                        </View>
+                        
                         <View>
                             <Text style={{ color: "white", fontSize: 18 }}>
                                 Welcome, sodiq
@@ -141,6 +137,8 @@ const index = () => {
                     </View>
 
                 </View>
+
+                
                 <View style={{ width: "100%", justifyContent: "center", alignItems: "center" }}>
                     <View style={{ width: "80%", marginHorizontal: "auto", paddingBottom: 15 }}>
                         <ApButton

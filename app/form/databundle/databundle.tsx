@@ -22,7 +22,7 @@ const DataForm = () => {
 
     const [selectedDataPlan, setSelectedDataPlan] = useState('')
     const { dataServices, getDataPlan } = useVtpassContext();
-    const {buyDatabundle,getDataPlans, success, resetError, loading, isError} = useBuyDataBundleContext()
+    const {buyDatabundle,success, resetError, loading, isError} = useBuyDataBundleContext()
     const [inputValue, setInputValue] = useState<{ variation_code: string}>({
         variation_code: "mtn-10mb-100",
     });
@@ -34,8 +34,8 @@ const DataForm = () => {
     const handlePresentModalPress = () => bottomSheetRef.current?.present();
 
     const handleDataPlan = async (value: any) => {
-        const payload = `${value}-data`
-        setSelectedDataPlan(payload);
+        const payload = `${value}-data`;
+        setSelectedDataPlan(payload)
         handlePresentModalPress();
         await getDataPlan(payload);
     }
@@ -51,7 +51,6 @@ const DataForm = () => {
             request_id: id
         }
         buyDatabundle(payload)
-        console.log(payload, 'payload...')
 
     };
 
@@ -78,7 +77,7 @@ const DataForm = () => {
                 initialValues={{  billersCode: '' }}
                 onSubmit={handleFormSubmit}
             >
-                {({ handleSubmit, values }) => (
+                {({ handleSubmit, values ,isValid, dirty }) => (
                     <View>
                         <View>
                             <Text style={{ marginVertical: 10 }}>Service Provider: {selectedDataPlan}</Text>
@@ -87,14 +86,13 @@ const DataForm = () => {
                                     <TouchableOpacity key={index} onPress={() => {
                                         handleDataPlan(p.value)
                                 }}>
-                                        <View style={selectedDataPlan === p.value ? { position: "relative", borderWidth: 2, borderColor: "red", borderRadius: 4, padding: 4 } : {}}>
+                                        <View style={selectedDataPlan === p.value? { position: "relative", borderWidth: 2, borderColor: "red", borderRadius: 4, padding: 4 } : {}}>
                                             <Image
                                                 source={p.img}
                                                 style={{ width: 75, height: 75, borderRadius: 10 }}
                                             />
                                             {selectedDataPlan === p.value && (
                                                 <View style={{ position: "absolute", top: 20, left: 25 }}>
-                                                    {/* Assuming ApIcon is your custom icon component */}
                                                     <ApIcon size={25} name="check" type="Entypo" color="red" />
                                                 </View>
                                             )}
@@ -104,13 +102,9 @@ const DataForm = () => {
                             </View>
                         </View>
 
-                        {/* <Field
-                            component={ApTextInput}
-                            name="amount"
-                            label="Enter Amount"
-                            placeholder="Enter amount..."
-                            keyboardType="numeric"
-                        /> */}
+                       <View style={{paddingVertical:10, borderWidth:1, borderColor:"grey", marginTop:10}}>
+                        <Text style={{fontWeight:"bold", paddingLeft:8}}>{inputValue.variation_code}</Text>
+                       </View>
 
 
                         <Field
@@ -130,7 +124,10 @@ const DataForm = () => {
 
                         />
 
-                        <ApButton label="Continue..." onPress={()=>handleOpenModal(values)} />
+                        <ApButton label="Continue..." 
+                       onPress={() => handleOpenModal(values)}
+                            disabled={!(isValid && dirty)} 
+                         />
                     </View>
                 )}
             </Formik>
@@ -146,9 +143,12 @@ const DataForm = () => {
                                         variation_code: s.variation_code,
                                     }),
                                         dismiss()
+                                       
                                 }}>
 
-                                    <Text>{s.name}</Text>
+                                    <Text style={{color:"white", marginVertical:4, backgroundColor:"#362756", paddingHorizontal:20, 
+                                        paddingVertical:10
+                                    }}>{s.name}</Text>
                                 </TouchableOpacity>
 
                             ))
@@ -166,9 +166,20 @@ const DataForm = () => {
             <ApModal visible={modalVisible} onClose={handleCloseModal}>
                 {formValues && !isError && !success && (
                     <View>
-                        <Text style={{ textAlign: "center", paddingVertical: 4 }}>
+                    <View style={{ justifyContent: "center", alignItems: "center" }}>
+
+
+                         <ApIcon
+            size={50}
+            name="verified"
+            type="MaterialIcons"
+            color='green'
+        />
+    </View>
+                        <Text style={{ textAlign: "center", fontWeight:"800" }}>
                             Confirm the following information:
                         </Text>
+                       
                         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                             <Text>Service</Text>
                             <Text>{selectedDataPlan}</Text>
@@ -187,12 +198,20 @@ const DataForm = () => {
 
                 {success && (
                     <View>
-                        <Text>Congratulations!</Text>
-                        <Text>Your transaction was successful.</Text>
-                        <View>
-                            <ApButton label="Place Another Transaction" onPress={() => resetFormValues} />
-                            <ApButton label="Close" onPress={() => { router.navigate("/home") }} />
-                        </View>
+                      <Text style={{textAlign:"center", fontWeight:"800"}}>Congratulations!</Text>
+                        <Text style={{textAlign:"center"}}>Your transaction was successful.</Text>
+                                      <View style={{ justifyContent: "center", alignItems: "center" }}>
+        <ApIcon
+            size={45}
+            name="check"
+            type="FontAwesome"
+            color='green'
+        />
+    </View>
+                            <ApButton label="Close" onPress={() => { 
+                                router.navigate("/home");
+                                resetError()
+                                 }} />
                     </View>
                 )}
 
